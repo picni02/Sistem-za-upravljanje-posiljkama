@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Admin panel</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
+        />
+        <script
+            src="https://kit.fontawesome.com/ed23f4033a.js"
+            crossorigin="anonymous"
+        ></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+        <link href="./bootstrap/css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <nav style="background-color: #fcf5c7" class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand">PostExpress</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" th:href="@{/}">
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasAuthority('ADMIN')"><a class="nav-link" th:href="@{/adminpanel}">
+                            Admin panel
+                        </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasAuthority('SUPERADMIN')">
+                            <a class="nav-link" th:href="@{/superadminpanel}">
+                                Superadmin panel
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasAuthority('DOSTAVLJAC')">
+                            <a class="nav-link" th:href="@{/radnikpanel}">
+                                Radnik panel
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="d-flex">
+                        <a th:href="@{/radnikprofile}" class="btn btn-outline-dark mx-1" type="submit" sec:authorize="hasAuthority('DOSTAVLJAC')"><i class="bi bi-person-fill"></i>
+                            Radnik Profil
+                        </a>
+                        <a th:href="@{/radnikprofile}" class="btn btn-outline-dark mx-1" type="submit" sec:authorize="hasAuthority('ADMIN')"><i class="bi bi-person-fill"></i>
+                            Admin Profil
+                        </a>
+                        <a th:href="@{/radnikprofile}" class="btn btn-outline-dark mx-1" type="submit" sec:authorize="hasAuthority('SUPERADMIN')"><i class="bi bi-person-fill"></i>
+                            Superadmin Profil
+                        </a>
+                        <a th:href="@{/logout}" class="btn btn-outline-dark mx-1" type="submit" sec:authorize="isAuthenticated()"><i class="bi bi-box-arrow-left"></i>
+                            Odjavi se
+                        </a>
+                        <a th:href="@{/login}" class="btn btn-outline-dark" type="submit" sec:authorize="isAnonymous()">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Prijavi se
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <header style="background-color: #fcf5c7" class="py-5">
+            <div class="container px-4 px-lg-5 my-5">
+                <div class="text-center text-black">
+                    <h1 class="display-4 fw-bolder">PostExpress</h1>
+                    <p class="lead fw-normal text-black-50-50 mb-0">
+                        Sistem za upravljanje pošiljkama
+                    </p>
+                </div>
+            </div>
+        </header>
+        <section class="m-3">
+            <div th:if="${message} != null" class="w-100">
+                <p th:text="${message}" class="text-center"></p>
+            </div>
+            <div class="d-flex flex-wrap">
+
+
+                <div class="col-sm-4">
+                    <h3>Dodaj vozilo</h3>
+                    <form th:action="@{/dodajvozilo}"
+                          th:object="${vozilo}"
+                          method="post">
+                        <div class="form-group">
+                            <input type="text" class="form-control"
+                                   name="registarske_oznake"
+                                   th:field="*{registarske_oznake}"
+                                   placeholder="Registarske oznake: " required/>
+                        </div>
+                        <div class="form-group">
+                            <input type="checkbox" name="prio" id="prio" th:field="*{status}" placeholder="Slobodno">
+                            Slobodno
+                        </div>
+
+
+                        <div class="form-group">
+                            <select class="form-control" name="filijalaId" th:field="*{filijala}">
+                                <option value="0">Filijala</option>
+                                <option
+                                    th:each="filijala : ${filijale}"
+                                    th:value="${filijala.getFilijalaID()}"
+                                    th:text="${filijala.getNazivFilijale()}"
+                                ></option>
+                            </select>
+                        </div>
+                        <p th:if="${filijale.size() == 0}">Moraš odabrati filijalu.</p>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-dark">
+                                Dodaj
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-sm-3">
+                    <h3>Dodaj lokaciju</h3>
+                    <form th:action="@{/dodajlokaciju}" th:object="${lokacija}" method="post">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="nazivLokacije" th:field="*{nazivLokacije}" placeholder="Naziv lokacije" required/>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control"
+                                   name="postanski_broj"
+                                   th:field="*{postanski_broj}"
+                                   placeholder="Poštanski broj" required/>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-dark">
+                                Dodaj
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-sm-4">
+                    <h3>Dodaj okrug</h3>
+                    <form th:action="@{/dodajokrug}"
+                          th:object="${okrug}"
+                          method="post">
+                        <div class="form-group">
+                            <select class="form-control" name="okrugId" th:field="*{lokacija}">
+                                <option value="0">Lokacija</option>
+                                <option
+                                        th:each="lok : ${lokacije}"
+                                        th:value="${lok.getLokacijaID()}"
+                                        th:text="${lok.getNazivLokacije()}"
+                                ></option>
+                            </select>
+                        </div>
+                        <p th:if="${filijale.size() == 0}">Moraš odabrati lokaciju.</p>
+                        <div class="form-group">
+                            <select class="form-control" name="okrugId" th:field="*{filijala}">
+                                <option value="0">Filijala</option>
+                                <option
+                                        th:each="filijala : ${filijale}"
+                                        th:value="${filijala.getFilijalaID()}"
+                                        th:text="${filijala.getNazivFilijale()}"
+                                ></option>
+                            </select>
+                        </div>
+                        <p th:if="${filijale.size() == 0}">Moraš odabrati filijalu.</p>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-dark">
+                                Dodaj
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="container px-4 px-lg-5 mt-5">
+                <h4 class="text-center"><b>Pošiljke</b></h4>
+                <div
+                        class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center"
+                >
+                    <h4 class="text-center" th:if="${posiljke == null || posiljke.size()==0 }">Nema pošiljki.</h4>
+                    <div class="col mb-5" th:if="${posiljke.size() != 0 || posiljke != null}" th:each="p : ${posiljke}">
+                        <div class="card h-100">
+                            <!-- Product details-->
+                            <div class="card-body p-4">
+                                <div class="text-center">
+                                    <!-- Product name-->
+                                    <h5 class="fw-bolder" th:text="${'ID:' + p.getIDposiljke()}"></h5>
+
+                                    <!-- Adresa pošiljaoca -->
+                                    <div>
+                                        <span class="fw-bold">Adresa pošiljaoca:</span>
+                                        <span th:text="${p.getAdresaPosiljaoca()}"></span>
+                                    </div>
+
+                                    <!-- Adresa primaoca -->
+                                    <div>
+                                        <span class="fw-bold">Adresa primaoca:</span>
+                                        <span th:text="${p.getAdresaPrimaoca()}"></span>
+                                    </div>
+
+                                    <!-- Težina -->
+                                    <div>
+                                        <span class="fw-bold">Težina:</span>
+                                        <span th:text="${p.getTezina()}"></span>
+                                    </div>
+
+                                    <!-- Cijena -->
+                                    <div>
+                                        <span class="fw-bold">Cijena:</span>
+                                        <span th:text="${p.getCijena()}"></span>
+                                    </div>
+
+                                    <!-- Tip -->
+                                    <div>
+                                        <span class="fw-bold">Tip:</span>
+                                        <span th:text="${p.getTip().getNazivTipa()}"></span>
+                                    </div>
+
+                                    <!-- Status -->
+                                    <div>
+                                        <span class="fw-bold">Status:</span>
+                                        <span th:text="${p.getStatus().getNazivStatusa()}"></span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="container px-4 px-lg-5 mt-5">
+                <h4 class="text-center" ><b>Lokacije</b></h4>
+                <div
+                        class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center"
+                >
+                    <h4 class="text-center" th:if="${lokacije == null || lokacije.size()==0 }">Nema lokacija.</h4>
+                    <div class="col mb-5" th:if="${lokacije.size() != 0 || lokacije != null}" th:each="l : ${lokacije}">
+                        <div class="card h-100">
+                            <!-- Product details-->
+                            <div class="card-body p-4">
+                                <div class="text-center">
+                                    <!-- Product name-->
+                                    <h5 class="fw-bolder" th:text="${'ID lokacije:' + l.getLokacijaID()}"></h5>
+
+                                    <div>
+                                        <span class="fw-bold">Naziv lokacije:</span>
+                                        <span th:text="${l.getNazivLokacije()}"></span>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold">Poštanski broj:</span>
+                                        <span th:text="${l.getPostanski_broj()}"></span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="container px-4 px-lg-5 mt-5">
+                <h4 class="text-center" ><b>Okruzi</b></h4>
+                <div
+                        class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center"
+                >
+                    <h4 class="text-center" th:if="${okruzi == null || okruzi.size()==0 }">Nema okruga.</h4>
+                    <div class="col mb-5" th:if="${okruzi.size() != 0 || okruzi != null}" th:each=" o : ${okruzi}">
+                        <div class="card h-100">
+                            <!-- Product details-->
+                            <div class="card-body p-4">
+                                <div class="text-center">
+                                    <!-- Product name-->
+                                    <h5 class="fw-bolder" th:text="${'ID okruga:' + o.getOkrugID()}"></h5>
+
+                                    <div>
+                                        <span class="fw-bold">Naziv lokacije:</span>
+                                        <span th:text="${o.getLokacija().getNazivLokacije()}"></span>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold">Poštanski broj:</span>
+                                        <span th:text="${o.getLokacija().getPostanski_broj()}"></span>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold">Filijala:</span>
+                                        <span th:text="${o.getFilijala().getNazivFilijale()}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="container px-4 px-lg-5 mt-5">
+                <h4 class="text-center" ><b>Vozila</b></h4>
+                <div
+                        class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center"
+                >
+                    <h4 class="text-center" th:if="${vozila == null || vozila.size()==0 }">Nema vozila.</h4>
+                    <div class="col mb-5" th:if="${vozila.size() != 0 || vozila != null}" th:each=" voz : ${vozila}">
+                        <div class="card h-100">
+                            <!-- Product details-->
+                            <div class="card-body p-4">
+                                <div class="text-center">
+                                    <!-- Product name-->
+                                    <h5 class="fw-bolder" th:text="${'ID vozila: ' + voz.getVoziloID()}"></h5>
+
+                                    <div>
+                                        <span class="fw-bold">Registarske oznake:</span>
+                                        <span th:text="${voz.getRegistarske_oznake()}"></span>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold">Filijala:</span>
+                                        <span th:text="${voz.getFilijala().getNazivFilijale()}"></span>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold">Status:</span>
+                                        <span th:text="${(voz.isStatus() ? 'Slobodno' : 'Zauzeto')}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer style="background-color: #fcf5c7" class="py-5">
+            <div class="container">
+                <p class="m-0 text-center text-black">
+                    <b>RIS projekat</b>
+                </p>
+            </div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="./bootstrap/js/scripts.js"></script>
+
+    </body>
+</html>
